@@ -1,0 +1,17 @@
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+.vscode/*
+
+# Local History for Visual Studio Code
+.history/
+
+archive/
+.keys
+key.txt
+Notes.txt
+test.py

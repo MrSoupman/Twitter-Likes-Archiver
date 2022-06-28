@@ -1,0 +1,46 @@
+body {
+  background: #eee;
+  font-family: sans-serif;
+}
+
+.card {
+  width: 65vw;
+  background: #fff;
+  margin: 16px auto;
+  padding:8px;
+}
+
+.title {
+  background: #e3f4ff;
+  font-size: 16px;
+  padding: 8px;
+  margin-bottom: 8px;
+  margin-top: 0px;
+}
+
+.content {
+  background: #e3f4ff;
+  margin-bottom: 8px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.profile-container {
+  display: flex;
+}
+
+img {
+  width:65vw
+}
+
+#pfp{
+  margin-top:16px;
+  width:48px;
+  height:48px;
+  
+}
+.twithandle {
+  padding-left: 8px;
+}
