@@ -123,7 +123,8 @@ def CreateArchive(tweet: Tweet, tweetAuthor: TweetAuthor, media: List):
         li_new_tag = homePg.new_tag('li')
         li_new_tag.string = "<a href=" + "\"" + "tweets/" + tweetAuthor.AuthorID + "/" + tweet.TweetID + ".html" + "\"" + ">" + tweetAuthor.AuthorUsername + " - " + tweet.TweetText[:15] + "</a>"
         tags = homePg.ul
-        tags.insert(1, li_new_tag)
+        tags.append(li_new_tag)
+        #tags.insert(1, li_new_tag)
         f.seek(0)
         f.write(homePg.prettify(formatter=None))
         f.truncate()
@@ -168,21 +169,22 @@ def ArchiveTweet(tweet, media=None, author=None):
 
     CreateArchive(twtTweet, twtAuthor, lstMedia)
 
-def ArchiveLiked(username, api):
+def ArchiveLiked(user_name, api: tweepy.Client):
     pagination = None
-    userid = api.get_user(username=username)
+    user = api.get_user(username=user_name).data
     while True:
         try:
-            tweets = api.get_liked_tweets(id=userid, max_results=5,
+            tweets = api.get_liked_tweets(id=user.id, max_results=5,
                 tweet_fields=["id","text","attachments","author_id","created_at"],  
                 media_fields=["media_key","type","url","alt_text"],
                 user_fields=["id","name","username", "profile_image_url"],
                 expansions=["attachments.media_keys","author_id"],
                 pagination_token=pagination)
             media = {m["media_key"]: m for m in tweets.includes['media']}
+            users = {u['id']: u for u in tweets.includes['users']}
             for i in range(0, len(tweets.data)):
                 if not os.path.exists("archive/tweets/" + str(tweets.data[i]['id'])):
-                    ArchiveTweet(tweets.data[i], media, tweets.includes['users'][i].data)
+                    ArchiveTweet(tweets.data[i], media, users[tweets.data[i].author_id])
                 else:
                     print("Tweet already exists: " + tweets.data[i]['id'])
             if 'next_token' in tweets.meta:
@@ -192,7 +194,6 @@ def ArchiveLiked(username, api):
         except tweepy.errors.TooManyRequests:
             print("Call limit reached, waiting 15 min...")
             time.sleep(60 * 15)
-        
     
 
 if __name__ == '__main__':
