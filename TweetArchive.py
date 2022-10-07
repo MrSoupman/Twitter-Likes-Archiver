@@ -19,6 +19,7 @@ resDir = os.path.join(cwd, archiveDir, "res")
 profileDir = os.path.join(resDir, "profile")
 mediaDir = os.path.join(resDir, "media")
 req = requests.Session()
+appendTop = False
 
 class TweetAuthor:
     def __init__(self, AuthorID, AuthorName, AuthorUsername, AuthorPicture):
@@ -123,8 +124,10 @@ def CreateArchive(tweet: Tweet, tweetAuthor: TweetAuthor, media: List):
         li_new_tag = homePg.new_tag('li')
         li_new_tag.string = "<a href=" + "\"" + "tweets/" + tweetAuthor.AuthorID + "/" + tweet.TweetID + ".html" + "\"" + ">" + tweetAuthor.AuthorUsername + " - " + tweet.TweetText[:15] + "</a>"
         tags = homePg.ul
-        tags.append(li_new_tag)
-        #tags.insert(1, li_new_tag)
+        if appendTop is False:
+            tags.append(li_new_tag)
+        else:
+            tags.insert(1, li_new_tag)
         f.seek(0)
         f.write(homePg.prettify(formatter=None))
         f.truncate()
@@ -164,7 +167,7 @@ def ArchiveTweet(tweet, media=None, author=None):
         for key in media_keys:
             if media[key].url:
                 lstMedia.append(media[key].url)
-            elif media[key].type == 'video': # twitterv2 api does not support direct video links yet
+            elif media[key].type == 'video' or media[key].type == 'animated_gif': # twitterv2 api does not support direct video links yet
                 lstMedia.append("video")
 
     CreateArchive(twtTweet, twtAuthor, lstMedia)
@@ -183,7 +186,8 @@ def ArchiveLiked(user_name, api: tweepy.Client):
             media = {m["media_key"]: m for m in tweets.includes['media']}
             users = {u['id']: u for u in tweets.includes['users']}
             for i in range(0, len(tweets.data)):
-                if not os.path.exists("archive/tweets/" + str(tweets.data[i]['id'])):
+                dir = os.path.join(archiveDir, os.path.join(str(tweets.data[i].author_id), str(tweets.data[i]['id']) + ".html"))
+                if not os.path.exists(dir):
                     ArchiveTweet(tweets.data[i], media, users[tweets.data[i].author_id])
                 else:
                     print("Tweet already exists: " + tweets.data[i]['id'])
@@ -228,6 +232,8 @@ if __name__ == '__main__':
     else:
         username = sys.argv[1]
 
+    if os.path.exists(os.path.join(archiveDir, "index.html")):
+        appendTop = True
     
     if username != "":
         ArchiveLiked(username, api)
